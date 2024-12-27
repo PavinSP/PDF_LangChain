@@ -2,6 +2,8 @@ import streamlit as st
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 from langchain_text_splitters import CharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -21,6 +23,11 @@ def get_text_chunks(text):
     chunks = text_splitter.split_text(text)
     return chunks
 
+def get_vectorstore(text_chunks):
+    embeddings = HuggingFaceEmbeddings(model_name="hkunlp/instructor-xl")
+    vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
+    return vectorstore
+
 def main():
     load_dotenv()
     st.set_page_config(page_title="Chat with multiple PDFs", page_icon=":books:")
@@ -38,9 +45,10 @@ def main():
 
                 # Get the text chunks
                 text_chunks = get_text_chunks(raw_text)
-                st.write(text_chunks)
 
                 # Create vector store
+                vector_store = get_vectorstore(text_chunks)
+
 
 if __name__ == "__main__":
     main()
