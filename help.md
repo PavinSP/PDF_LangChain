@@ -5,3 +5,5 @@
 - Install faiss-cpu: to create a vector database
 - Install openai
 - Install huggingface-hub: to use huggingface models
+- API key: https://platform.openai.com/account/api-keys
+- Huggingface token: https://huggingface.co/settings/tokens
