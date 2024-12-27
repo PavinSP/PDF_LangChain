@@ -4,6 +4,9 @@ from PyPDF2 import PdfReader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationRetrievalChain
+from langchain.chat_models import ChatOpenAI
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -28,6 +31,16 @@ def get_vectorstore(text_chunks):
     vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
     return vectorstore
 
+def get_conversation_chain(vectorstore):
+    llm = ChatOpenAI()
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    conversation_chain = ConversationRetrievalChain.from_llm(
+        llm=llm,
+        retriever=vectorstore.as_retriever(),
+        memory=memory
+    )
+    return conversation_chain
+
 def main():
     load_dotenv()
     st.set_page_config(page_title="Chat with multiple PDFs", page_icon=":books:")
@@ -49,6 +62,8 @@ def main():
                 # Create vector store
                 vector_store = get_vectorstore(text_chunks)
 
+                # Create converstaion chain
+                conversation = get_conversation_chain(vector_store)
 
 if __name__ == "__main__":
     main()
